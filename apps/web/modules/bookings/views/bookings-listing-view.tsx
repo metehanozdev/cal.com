@@ -223,26 +223,26 @@ function BookingsContent({ status }: BookingsProps) {
                   <WipeMyCalActionButton bookingStatus={status} bookingsEmpty={isEmpty} />
                   <p className="text-subtle mb-2 text-xs font-medium uppercase leading-4">{t("today")}</p>
                   <div className="border-subtle overflow-hidden rounded-md border">
-                    <table className="w-full max-w-full table-fixed">
-                      <tbody className="bg-default divide-subtle divide-y" data-testid="today-bookings">
-                        <Fragment>
-                          {bookingsToday.map((booking: BookingOutput) => (
-                            <BookingListItem
-                              key={booking.id}
-                              loggedInUser={{
-                                userId: user?.id,
-                                userTimeZone: user?.timeZone,
-                                userTimeFormat: user?.timeFormat,
-                                userEmail: user?.email,
-                              }}
-                              listingStatus={status}
-                              recurringInfo={recurringInfoToday}
-                              {...booking}
-                            />
-                          ))}
-                        </Fragment>
-                      </tbody>
-                    </table>
+                    <div
+                      className="bg-default divide-subtle w-full max-w-full divide-y"
+                      data-testid="today-bookings">
+                      <Fragment>
+                        {bookingsToday.map((booking: BookingOutput) => (
+                          <BookingListItem
+                            key={booking.id}
+                            loggedInUser={{
+                              userId: user?.id,
+                              userTimeZone: user?.timeZone,
+                              userTimeFormat: user?.timeFormat,
+                              userEmail: user?.email,
+                            }}
+                            listingStatus={status}
+                            recurringInfo={recurringInfoToday}
+                            {...booking}
+                          />
+                        ))}
+                      </Fragment>
+                    </div>
                   </div>
                 </div>
               )}
