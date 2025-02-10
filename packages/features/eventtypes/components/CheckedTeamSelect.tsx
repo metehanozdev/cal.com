@@ -79,6 +79,7 @@ export const CheckedTeamSelect = ({
   return (
     <>
       <Select
+        {...props}
         name={props.name}
         placeholder={props.placeholder || t("select")}
         isSearchable={true}
@@ -87,6 +88,7 @@ export const CheckedTeamSelect = ({
         isMulti
         className={customClassNames?.hostsSelect?.select}
         innerClassNames={customClassNames?.hostsSelect?.innerClassNames}
+
         onChange={(newValue, { action }) => {
           onOptionChange(newValue);
           if (action === "clear" && onClearAllClick) {
