@@ -214,9 +214,13 @@ test.describe("pro user", () => {
     const cancelledHeadline = page.locator('[data-testid="cancelled-headline"]');
     await expect(cancelledHeadline).toBeVisible();
     const bookingCancelledId = new URL(page.url()).pathname.split("/booking/")[1];
+
+    const { slug: eventSlug } = await pro.getFirstEventAsOwner();
+
     await page.goto(`/reschedule/${bookingCancelledId}`);
-    // Should be redirected to the booking details page which shows the cancelled headline
-    await expect(page.locator('[data-testid="cancelled-headline"]')).toBeVisible();
+
+    // Should be redirected to the original event link
+    await expect(page).toHaveURL(new RegExp(`/${pro.username}/${eventSlug}`));
   });
 
   test("can book an event that requires confirmation and then that booking can be accepted by organizer", async ({
@@ -400,6 +404,23 @@ test.describe("prefill", () => {
       await expect(page.locator('[name="name"]')).toHaveValue(testName);
       await expect(page.locator('[name="email"]')).toHaveValue(testEmail);
     });
+  });
+
+  test("skip confirm step if all fields are prefilled from query params", async ({ page }) => {
+    await page.goto("/pro/30min");
+    const url = new URL(page.url());
+    url.searchParams.set("name", testName);
+    url.searchParams.set("email", testEmail);
+    url.searchParams.set("guests", "guest1@example.com");
+    url.searchParams.set("guests", "guest2@example.com");
+    url.searchParams.set("notes", "This is an additional note");
+    await page.goto(url.toString());
+    await selectFirstAvailableTimeSlotNextMonth(page);
+
+    await expect(page.locator('[data-testid="skip-confirm-book-button"]')).toBeVisible();
+    await page.click('[data-testid="skip-confirm-book-button"]');
+
+    await expect(page.locator("[data-testid=success-page]")).toBeVisible();
   });
 });
 
