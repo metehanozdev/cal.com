@@ -20,6 +20,7 @@ import {
   singleSelectFilter,
   multiSelectFilter,
   ColumnFilterType,
+  convertFacetedValuesToMap,
 } from "@calcom/features/data-table";
 import { useOrgBranding } from "@calcom/features/ee/organizations/context/provider";
 import classNames from "@calcom/lib/classNames";
@@ -289,9 +290,7 @@ function UserListTableContent() {
         enableHiding: false,
         enableColumnFilter: false,
         size: 200,
-        header: () => {
-          return `Members`;
-        },
+        header: "Members",
         cell: ({ row }) => {
           const { username, email, avatarUrl } = row.original;
           return (
@@ -437,7 +436,6 @@ function UserListTableContent() {
     data: flatData,
     columns: memorisedColumns,
     enableRowSelection: true,
-    columnResizeMode: "onChange",
     debugTable: true,
     manualPagination: true,
     initialState: {
@@ -451,7 +449,6 @@ function UserListTableContent() {
       size: 150,
     },
     state: {
-      columnFilters,
       rowSelection,
     },
     getCoreRowModel: getCoreRowModel(),
@@ -462,13 +459,28 @@ function UserListTableContent() {
       if (facetedTeamValues) {
         switch (columnId) {
           case "role":
-            return new Map(facetedTeamValues.roles.map((role) => [role, 1]));
+            return convertFacetedValuesToMap(
+              facetedTeamValues.roles.map((role) => ({
+                label: role,
+                value: role,
+              }))
+            );
           case "teams":
-            return new Map(facetedTeamValues.teams.map((team) => [team.name, 1]));
+            return convertFacetedValuesToMap(
+              facetedTeamValues.teams.map((team) => ({
+                label: team.name,
+                value: team.name,
+              }))
+            );
           default:
             const attribute = facetedTeamValues.attributes.find((attr) => attr.id === columnId);
             if (attribute) {
-              return new Map(attribute?.options.map(({ value }) => [value, 1]) ?? []);
+              return convertFacetedValuesToMap(
+                attribute?.options.map(({ value }) => ({
+                  label: value,
+                  value,
+                })) ?? []
+              );
             }
             return new Map();
         }
@@ -567,7 +579,6 @@ function UserListTableContent() {
                 type="button"
                 color="primary"
                 StartIcon="plus"
-                className="rounded-md"
                 onClick={() =>
                   dispatch({
                     type: "INVITE_MEMBER",
@@ -592,8 +603,12 @@ function UserListTableContent() {
           </DataTableSelectionBar.Root>
         )}
         {numberOfSelectedRows > 0 && (
-          <DataTableSelectionBar.Root className="justify-center">
-            <p className="text-brand-subtle px-2 text-center text-xs leading-none sm:text-sm sm:font-medium">
+          <DataTableSelectionBar.Root
+            className="justify-center"
+            style={{
+              width: "max-content",
+            }}>
+            <p className="text-brand-subtle shrink-0 px-2 text-center text-xs leading-none sm:text-sm sm:font-medium">
               {t("number_selected", { count: numberOfSelectedRows })}
             </p>
             {!isPlatformUser ? (
@@ -601,6 +616,7 @@ function UserListTableContent() {
                 <TeamListBulkAction table={table} />
                 {numberOfSelectedRows >= 2 && (
                   <DataTableSelectionBar.Button
+                    color="secondary"
                     onClick={() => setDynamicLinkVisible(!dynamicLinkVisible)}
                     icon="handshake">
                     {t("group_meeting")}
